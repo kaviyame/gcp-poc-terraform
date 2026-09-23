@@ -3,6 +3,11 @@ output "subscription" {
   value       = google_pubsub_subscription.log360.id
 }
 
+output "logging_project" {
+  description = "Project holding the topic and subscription. For organization scope this is the project this module created."
+  value       = local.target_project
+}
+
 output "topic" {
   description = "Full resource name of the created topic."
   value       = google_pubsub_topic.log360.id
@@ -14,8 +19,8 @@ output "sink_name" {
 }
 
 output "sink_scope" {
-  description = "Where the sink was created, as scope/id."
-  value       = "${var.scope}/${var.scope_id}"
+  description = "Where the sink was created."
+  value       = local.is_org ? "organizations/${var.org_id} (aggregated, include_children, non-intercepting)" : "projects/${var.project_id}"
 }
 
 output "sink_writer_identity" {
@@ -30,5 +35,5 @@ output "sink_filter" {
 
 output "verify" {
   description = "Command to confirm entries are arriving."
-  value       = "gcloud pubsub subscriptions pull ${local.sub_name} --project=${var.project_id} --auto-ack --limit=5"
+  value       = "gcloud pubsub subscriptions pull ${local.sub_name} --project=${local.target_project} --auto-ack --limit=5"
 }

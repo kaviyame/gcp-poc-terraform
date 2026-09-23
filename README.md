@@ -8,30 +8,62 @@ this path**, and the only permission it holds afterwards is
 
 ## Use
 
+Set **exactly one** of `project_id` or `org_id`. That choice is the scope.
+
+### Project scope
+
 ```hcl
-module "log360" {
-  source = "./log360-gcp"
-
-  project_id = "acme-central-logs"
-  scope      = "organization"
-  scope_id   = "123456789012"
-
-  collector_service_account = "log360-collector@acme-central-logs.iam.gserviceaccount.com"
-
-  sources = [
-    "audit_activity", "audit_system_event", "audit_policy",
-    "firewall", "nat", "load_balancer",
-  ]
-}
+project_id                = "acme-prod"
+collector_service_account = "log360-collector@acme-prod.iam.gserviceaccount.com"
+sources                   = ["audit_activity", "audit_system_event", "firewall"]
 ```
 
+Sink, topic and subscription are all created in that project, and the sink
+covers that project only. Projects created later are not included, and nothing
+reports that it has gone stale.
+
+### Organization scope
+
+```hcl
+org_id                    = "123456789012"
+billing_account           = "01ABCD-2345EF-6789GH"
+collector_service_account = "log360-collector@acme-prod.iam.gserviceaccount.com"
+sources                   = ["audit_activity", "audit_system_event", "firewall"]
 ```
+
+Creates a central logging project, puts the topic and subscription in it, and
+creates an aggregated sink at the organization covering every project beneath —
+including ones created later.
+
+The sink is **non-intercepting**: each project's own `_Default` sink keeps
+working and its logs stay searchable in that project. We add a route, we do not
+divert one.
+
+This path creates a project, so it additionally needs
+`resourcemanager.projectCreator` on the organization and a billing account you
+can attach. That is a considerably larger permission than everything else here.
+If it is not available, create the project yourself and use `project_id`.
+
+### Running it
+
+```
+cd gcp-poc-terraform
+# edit terraform.tfvars
 terraform init
 terraform plan      # matches the plan shown in Log360 exactly
 terraform apply
 ```
 
 Then paste the `subscription` output into Log360 Cloud.
+
+The provider block goes in your root module, not here:
+
+```hcl
+provider "google" {
+  # Credentials come from your own session:
+  #   gcloud auth application-default login
+}
+```
 
 ## What it creates
 
@@ -52,7 +84,7 @@ nothing — with no error anywhere.
 
 | Role | On |
 |---|---|
-| `roles/logging.configWriter` | the organization, folder or project in `scope_id` |
+| `roles/logging.configWriter` | the organization or project you are covering |
 | `roles/pubsub.admin` | `project_id` |
 
 `pubsub.admin` is broader than needed. A custom role with

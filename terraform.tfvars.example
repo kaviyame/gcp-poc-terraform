@@ -1,0 +1,35 @@
+# Copy to terraform.tfvars and edit.
+
+project_id = "acme-central-logs"     # holds the topic and subscription
+
+scope      = "organization"          # organization | folder | project
+scope_id   = "123456789012"          # org ID, folder ID, or project ID
+
+collector_service_account = "log360-collector@acme-central-logs.iam.gserviceaccount.com"
+
+sources = [
+  "audit_activity",
+  "audit_system_event",
+  "audit_policy",
+  "firewall",
+  "nat",
+  "load_balancer",
+
+  # Frequently larger than every other source combined. Leave it out unless you
+  # need read-level auditing.
+  # "audit_data_access",
+]
+
+# Optional. Values must come from your GCP inventory — a name that does not
+# exist matches zero entries and reports no error.
+#
+# resource_scoping = {
+#   nat = {
+#     label  = "resource.labels.gateway_name"
+#     values = ["nat-gw-use1", "nat-gw-euw1"]
+#   }
+#   load_balancer = {
+#     label  = "resource.labels.forwarding_rule_name"
+#     values = ["fr-web-prod", "fr-api-prod"]
+#   }
+# }

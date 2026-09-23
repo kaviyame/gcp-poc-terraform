@@ -1,0 +1,15 @@
+# Terraform state can contain resource metadata and should never be public.
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+
+# Real variable files — but NOT terraform.tfvars, which is a committed
+# placeholder the Cloud Shell editor opens for the customer to overwrite.
+*.auto.tfvars
+*.tfvars.local
+
+# Credentials must never reach this repo.
+*.json
+!*.tfvars.example

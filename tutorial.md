@@ -68,6 +68,40 @@ Two things about `sources`, each of which becomes one clause in the sink filter:
 
 Save with `Ctrl+S`.
 
+## What each source routes
+
+The name you put in `sources` becomes one clause in the sink filter. Paste any
+of these into Logs Explorer to see exactly what it will match.
+
+* `audit_activity` — `logName:"cloudaudit.googleapis.com%2Factivity"`
+* `audit_data_access` — `logName:"cloudaudit.googleapis.com%2Fdata_access"`
+* `audit_system_event` — `logName:"cloudaudit.googleapis.com%2Fsystem_event"`
+* `audit_policy` — `logName:"cloudaudit.googleapis.com%2Fpolicy"`
+* `firewall` — `logName:"compute.googleapis.com%2Ffirewall"`
+* `nat` — `logName:"compute.googleapis.com%2Fnat"`
+* `dns` — `logName:"dns.googleapis.com%2Fdns_queries"`
+* `load_balancer` — `resource.type=("http_load_balancer" OR "internal_http_lb_rule")`
+* `load_balancer_regional` — `logName:"loadbalancing.googleapis.com%2Fexternal_regional_requests"`
+* `scc_threat_findings` — `resource.type="threat_detector"`
+
+The four audit streams are separate on purpose. The broader
+`logName:"cloudaudit.googleapis.com"` would match all of them, including Data
+Access, which is often larger than everything else combined and cannot then be
+turned off without rewriting the filter.
+
+Load balancer is the one source keyed on `resource.type` rather than `logName`.
+Its log ID is the bare word `requests`, which collides across products.
+
+Security Command Center is keyed on `resource.type` too. Findings are not in
+Cloud Logging by default — they arrive only when *Log findings to Logging* is
+enabled in Continuous Exports, and even then only Event Threat Detection and
+Container Threat Detection findings. There is no log named
+`securitycenter.googleapis.com`; SCC's own API activity is already covered by
+`audit_activity`.
+
+The `%2F` is percent-encoded on purpose. Writing it as `/` matches zero entries
+and reports no error.
+
 ## Plan and apply
 
 ```bash

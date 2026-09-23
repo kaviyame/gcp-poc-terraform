@@ -27,15 +27,10 @@ Click **Next** when you are ready.
 
 ## Set your values
 
-The file `terraform.tfvars` is open in the editor.
+`terraform.tfvars` is already open in the editor pane on the left.
+If you closed it, open it from the file tree.
 
-<walkthrough-editor-open-file filePath="terraform.tfvars">Open terraform.tfvars</walkthrough-editor-open-file>
-
-Paste the block Log360 gave you, replacing what is there. It contains your
-project, your sink scope, the log sources you selected, and the service account
-Log360 will read with.
-
-Save with `Ctrl+S`, then click **Next**.
+Paste the block Log360 gave you, replacing what is there...
 
 ## Review the plan
 

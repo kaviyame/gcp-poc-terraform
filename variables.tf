@@ -54,11 +54,19 @@ variable "central_project_name" {
 ###############################################################################
 
 variable "collector_service_account" {
-  description = "Service account Log360 reads with, as a bare email. It is granted roles/pubsub.subscriber on the created subscription and nothing else."
+  description = <<-EOT
+    Service account Log360 reads with, as a bare email. It is granted
+    roles/pubsub.subscriber on the created subscription and nothing else.
+
+    Leave it unset and no grant is made — the pipeline is built, and you add the
+    grant later. Nothing is created on your behalf either way.
+  EOT
   type        = string
+  default     = null
 
   validation {
-    condition     = can(regex("^[^@]+@[^@]+\\.iam\\.gserviceaccount\\.com$", var.collector_service_account))
+    condition = var.collector_service_account == null || can(regex(
+      "^[^@]+@[^@]+\\.iam\\.gserviceaccount\\.com$", var.collector_service_account))
     error_message = "Give the bare service account email, with no serviceAccount: prefix."
   }
 }

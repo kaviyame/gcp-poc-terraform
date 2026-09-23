@@ -37,3 +37,13 @@ output "verify" {
   description = "Command to confirm entries are arriving."
   value       = "gcloud pubsub subscriptions pull ${local.sub_name} --project=${local.target_project} --auto-ack --limit=5"
 }
+
+output "grant_collector" {
+  description = "Run this once the Log360 collector account exists, if you did not set collector_service_account."
+  value = var.collector_service_account != null ? "already granted" : join(" ", [
+    "gcloud pubsub subscriptions add-iam-policy-binding ${local.sub_name}",
+    "--project=${local.target_project}",
+    "--member=serviceAccount:COLLECTOR_EMAIL",
+    "--role=roles/pubsub.subscriber",
+  ])
+}

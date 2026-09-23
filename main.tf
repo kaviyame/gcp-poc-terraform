@@ -234,13 +234,17 @@ resource "google_pubsub_subscription" "log360" {
 }
 
 ###############################################################################
-# 5 · Subscriber grant
+# 5 · Subscriber grant — only if a collector account was given
 #
 # The single permission Log360 holds in steady state. Nothing on the topic,
 # nothing on the sink, nothing at organization level.
 ###############################################################################
 
+# Skipped when collector_service_account is not set. Nothing is created on
+# your behalf — grant it later, or let Log360 tell you the command to run.
 resource "google_pubsub_subscription_iam_member" "collector" {
+  count = var.collector_service_account == null ? 0 : 1
+
   project      = local.target_project
   subscription = google_pubsub_subscription.log360.name
   role         = "roles/pubsub.subscriber"
